@@ -1,5 +1,7 @@
 # Space Invaders 3D Prototype
 
+<img width="1011" height="815" alt="image" src="https://github.com/user-attachments/assets/8236601f-b1c4-4b65-8a54-33b60b8eb594" />
+
 Прототип классической аркадной игры Space Invaders, реализованный в трехмерном пространстве с использованием OpenGL.
 
 
