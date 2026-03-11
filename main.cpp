@@ -10,12 +10,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// --- Константы ---
-const unsigned int SCR_WIDTH = 1024;
-const unsigned int SCR_HEIGHT = 768;
+// Глобальные константы
+const unsigned int SCR_WIDTH = 2560;
+const unsigned int SCR_HEIGHT = 1440;
 const float PI = 3.14159265359f;
 
-// --- Шейдеры ---
+// Вершинный шейдер
 const char* vShader = R"(
 #version 330 core
 layout (location = 0) in vec3 aPos;
@@ -29,6 +29,7 @@ void main() {
     gl_Position = projection * view * vec4(FragPos, 1.0);
 })";
 
+// Фрагментный шейдер
 const char* fShader = R"(
 #version 330 core
 out vec4 FragColor;
@@ -42,8 +43,7 @@ void main() {
     FragColor = vec4(result, 1.0);
 })";
 
-// --- Базовые классы ---
-
+// Базовый класс 
 class GameObject {
 public:
     glm::vec3 position, size, color;
@@ -66,6 +66,7 @@ public:
     }
 };
 
+// Класс пули
 class Bullet : public GameObject {
 public:
     glm::vec3 velocity;
@@ -76,12 +77,14 @@ public:
     }
 };
 
+// Класс игрока
 class Player : public GameObject {
 public:
     float lastShot = 0;
     Player() : GameObject(glm::vec3(0, -3.5f, 0), glm::vec3(0.8f, 0.25f, 0.4f), glm::vec3(0.2f, 0.6f, 1.0f)) {}
     void update(float dt) override {}
 
+	// Кулдаун для стрельбы
     bool canShoot() {
         if (glfwGetTime() - lastShot > 0.35f) {
             lastShot = (float)glfwGetTime();
@@ -91,18 +94,21 @@ public:
     }
 };
 
+// Класс пришельца
 class Alien : public GameObject {
 public:
     Alien(glm::vec3 p, glm::vec3 c) : GameObject(p, glm::vec3(0.7f), c) {}
     void update(float dt) override {}
 };
 
-// --- Менеджер ресурсов (Геометрия) ---
+// Менеджер ресурсов (Геометрия) 
 
 struct MeshData { GLuint vao; int count; };
 
+// Класс создания моделей
 class ResourceManager {
 public:
+    // Массив: x,y,z, nx,ny,nz
     static MeshData createCube() {
         float vertices[] = {
             -0.5,-0.5,-0.5, 0,0,-1,  0.5,-0.5,-0.5, 0,0,-1,  0.5, 0.5,-0.5, 0,0,-1, -0.5, 0.5,-0.5, 0,0,-1,
@@ -151,7 +157,7 @@ private:
     }
 };
 
-// --- Основной класс Игры ---
+// Игровой движок
 
 class Game {
 public:
@@ -165,8 +171,9 @@ public:
     int score = 0, wave = 1;
     bool running = true;
 
+	// Инициализация игры
     Game() {
-        shader = glCreateProgram(); // В реальности тут вызов загрузки шейдеров
+        shader = glCreateProgram(); 
         auto compile = [](GLenum type, const char* src) {
             GLuint s = glCreateShader(type); glShaderSource(s, 1, &src, 0); glCompileShader(s); return s;
             };
@@ -178,12 +185,14 @@ public:
         initLevel();
     }
 
+	// Инициализация уровня
     void initLevel() {
         aliens.clear(); bullets.clear();
         for (int r = 0; r < 3; ++r) for (int c = 0; c < 6; ++c)
             aliens.emplace_back(glm::vec3((c - 2.5f) * 1.3f, 2.0f + r * 1.2f, 0.0f), glm::vec3(0.2f, 0.8f - r * 0.2f, 0.4f));
     }
 
+	// Обработка ввода
     void processInput(GLFWwindow* window, float dt) {
         if (!running) return; // Управление блокируется при проигрыше
 
@@ -195,6 +204,7 @@ public:
             bullets.emplace_back(player.position + glm::vec3(0, 0.5f, 0), glm::vec3(0, 12.0f, 0));
     }
 
+	// Логика игры
     void update(float dt) {
         if (!running) return;
 
@@ -236,6 +246,7 @@ public:
         }
     }
 
+	// Отрисовка
     void render(GLFWwindow* window) {
         glClearColor(running ? 0.02f : 0.2f, 0.02f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
